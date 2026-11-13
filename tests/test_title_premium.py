@@ -35,7 +35,7 @@ with sync_playwright() as p:
  for viewport in ({'width':1300,'height':800},{'width':390,'height':850}):
   page=b.new_page(viewport=viewport)
   page.set_content((ROOT/'docs/index.html').read_text());page.add_script_tag(content=(ROOT/'docs/assets/site.js').read_text())
-  assert page.locator('.side-link').count()==11
+  assert page.locator('.side-link').count()==14
   if viewport['width']<800:
    page.locator('#mob').click();assert page.locator('body').evaluate("el=>el.classList.contains('nav-open')")
   page.locator('#docSearch').fill('title')

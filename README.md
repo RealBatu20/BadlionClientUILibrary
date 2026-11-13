@@ -1,4 +1,4 @@
-# BadlionMenuUI v1.1.5 — LeviLaunchroid Native UI Library
+# BadlionMenuUI v1.1.6 — LeviLaunchroid Native UI Library
 
 An independent Bedrock Android module-menu **library** inspired by the supplied Badlion Client menu screenshot. It supplies reusable cards, category filters, C++ callbacks, a Java/DEX WebView bridge and a Levi floating launcher button. It is not affiliated with Badlion.
 
@@ -38,7 +38,7 @@ A GitHub Pages documentation site is generated in `docs/index.html`; setup instr
 
 ## Using the menu
 
-Normal Mode uses a dark desktop-style panel; Compact Mode is smaller, and portrait mode automatically fits small screens. Search, switching, module details, profiles, themes, opacity, square sizing, UI scaling, and panel dragging are preserved. The HUD logo button is registered through Levi and is editable in Levi HUD Editor. The HTML WebView can attach during startup, but no additional fixed-position Android floating button is created. The native HUD button may appear only once Levi HUD rendering initializes.
+Normal Mode uses a dark desktop-style panel; Compact Mode is smaller, and portrait mode automatically fits small screens. Search, switching, module details, profiles, themes, opacity, square sizing, UI scaling, and panel dragging are preserved. The HUD logo button is registered through Levi and is editable in Levi HUD Editor. The HTML WebView can attach during startup, but no additional fixed-position Android floating button is created. The native HUD button is automatically configured for Levi’s **Show Everywhere** option so it can remain visible on the startup/loading screen even before the gameplay HUD becomes active. It still belongs to Levi and is editable in HUD Editor. The launcher may suppress all overlays if **Hide launcher HUD** is enabled.
 
 The visible starter templates use real state updates. In an installed native mod, tapping a template invokes `onTemplateToggle`, which logs the state but intentionally does **not** invent a Minecraft mod feature. To implement gameplay behavior, register a `BadlionModuleDescriptor` with your own callback and safely dispatch its work to a verified game thread.
 
@@ -76,10 +76,20 @@ python3 tools/package.py /path/to/output
 
 **Documentation:** Start with `docs/QUICK_START.md`, then `docs/CUSTOM_CATEGORIES_AND_TEMPLATES.md` and `docs/DEVELOPER_API.md`. The older startup and ABI repair guides are preserved as historical troubleshooting notes.
 
-## v1.1.5: Single Levi HUD button and clean toolbar
+## v1.1.6: Single Levi HUD button and clean toolbar
 
 Only the button registered with `pl::modmenu::registerButton()` is created. Its composited normal and pressed Badlion images are preserved, as are native click callbacks and Levi HUD Editor's movement/size control. The duplicate independent Android `WebView` icon from previous releases was removed: it could not be dragged/edited by the HUD Editor and stayed visible on unrelated screens. An HTML `fallbackFloat` control was also removed to avoid duplicating the same launcher.
 
 The `≡` shortcut directly beside Search was removed from normal, compact and portrait layouts. In **Settings → Module Square Size**, developers/users can still select Standard or Square.
 
 **Behavioral trade-off:** no separate floating launcher is drawn before Levi HUD initializes. The full HTML menu's startup-host path is unchanged, but the editable Levi button becomes available when the preloader displays native HUD buttons. Device-specific launch timing must be tested in Minecraft.
+
+## Startup button fix (v1.1.6)
+
+The LeviLaunchroid 1.6.1 launcher normally shows external buttons only with its gameplay HUD, or inside HUD Editor. The library now calls `InbuiltModManager.setOverlayShowEverywhere("external_button:badlionmenuui.launcher", true)` on the Android Activity UI thread and asks `InbuiltOverlayManager.refreshRuntimeVisibility()` to apply it immediately. This affects **the existing registered button**, not a second uneditable floating overlay; your HUD Editor position, size, and icon remain intact. See [the full explanation](docs/FIX_STARTUP_NATIVE_HUD_BUTTON.md).
+
+If you use Levi’s **Hide launcher HUD** option, it may still hide the button. Disable that option. Always uninstall an older version before importing v1.1.6.
+
+## v1.1.6 artwork hotfix — no extra square background
+
+The native registered Levi button now uses almost-transparent (ARGB alpha 1/255) background and border color overrides. Levi 1.6.1 draws its own keycap background by default even when a PNG is supplied; the overrides suppress that *extra wrapper square* without changing the supplied `badlion_button_normal.png` and `badlion_button_pressed.png` templates. HUD Editor drag/resize and Show Everywhere startup support remain. See [`docs/FIX_BUTTON_ARTWORK_BACKGROUND.md`](docs/FIX_BUTTON_ARTWORK_BACKGROUND.md).

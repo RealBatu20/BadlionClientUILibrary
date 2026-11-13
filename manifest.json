@@ -2,7 +2,7 @@
   "type": "preload-native",
   "name": "BadlionMenuUI",
   "author": "TheRealBatu",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "entry": "libbadlionmenuui.so",
   "minecraft_versions": [
     "1.26.*",

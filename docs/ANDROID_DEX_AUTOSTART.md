@@ -65,6 +65,6 @@ A WebView is created/destroyed only by tasks on the Android UI thread. Preloader
 
 The WebView JNI class layout and generated DEX **do not need to change** for this update. `HostApi.snapshot()` forwards the expanded JSON catalog: `templatesVisible`, `categories`, and `modules`. The three starter cards are functional native toggle examples with `template:true`; developer-owned cards have `template:false`. Users can hide starter cards from the HTML Settings page, while C++ developers can hide them in native snapshots using `BadlionUI_SetTemplatesVisible(0)`. The dynamic sidebar is implemented entirely in `web/src/menu.js`, so no hardcoded custom-category names are required in Java/DEX.
 
-## v1.1.5 — one HUD-controlled launcher
+## v1.1.6 — one HUD-controlled launcher
 
 The Android host attaches **only the full HTML menu**. It does not attach a small floating button WebView. The single launcher is a native Levi ModMenu `registerButton` widget, so HUD Editor can move/resize it. Startup HTML menu visibility is independent of when Levi draws its HUD controls.

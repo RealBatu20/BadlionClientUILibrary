@@ -1,4 +1,4 @@
-# v1.1.5 — Single editable Levi HUD floating button
+# v1.1.6 — Single editable Levi HUD floating button
 
 ## What was wrong
 
@@ -18,14 +18,14 @@ The HTML's own `#fallbackFloat` control was a **third** potential button when br
 
 ## Verification checklist on Android
 
-1. Uninstall/disable v1.1.4 before importing v1.1.5. Restart LeviLaunchroid. Do not leave duplicate versions with the same mod name.
+1. Uninstall/disable v1.1.4 before importing v1.1.6. Restart LeviLaunchroid. Do not leave duplicate versions with the same mod name.
 2. Join a world, open **Levi HUD Editor**, select the Badlion icon, move it and change its size. Save the HUD layout.
 3. Confirm only **one** Badlion floating button exists and no second icon overlaps the HUD Editor or other screens.
 4. Exit the editor, tap the native Badlion button to open/hide the full menu.
 5. Confirm the toolbar shows only **Mods**, **Settings**, **Profiles**, and **Search**, with no `≡` button.
 6. In Settings, test **Standard** and **Square** module tile sizes.
 
-The native Levi HUD button may not appear during startup until the HUD renderer has initialized. The startup menu WebView may still attach during startup. To get a button that is **editable in Levi HUD Editor**, do not create a separate Android overlay as a substitute.
+As of v1.1.6 the existing Levi button uses the launcher's **Show Everywhere** preference so it remains eligible to render even during startup/loading, once the external button overlay has been created. The startup menu WebView still attaches independently. No second non-editable button is created. See `FIX_STARTUP_NATIVE_HUD_BUTTON.md`.
 
 ## Extending the library
 

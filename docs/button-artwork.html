@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="BadlionMenuUI native C++ / HTML documentation: Button artwork &amp; background"><title>Button artwork &amp; background — BadlionMenuUI Docs</title><link rel="stylesheet" href="assets/site.css"></head><body><button id="mob" aria-label="Toggle docs navigation">☰</button><div class="shell"><aside class="sidebar"><div class="identity"><img src="assets/badlion_logo.png" alt="Badlion-style logo"><div><strong>BadlionMenuUI</strong><small>C/C++ · Java/DEX · v1.1.6</small></div></div><input id="docSearch" class="search" type="search" placeholder="Filter documentation…" aria-label="Filter documentation links"><div class="navcaption">DEVELOPER DOCUMENTATION</div><nav><a class="side-link " href="index.html"><b>01</b> Overview</a><a class="side-link " href="quick-start.html"><b>02</b> Quick start</a><a class="side-link " href="developer-api.html"><b>03</b> Developer C/C++ API</a><a class="side-link " href="categories.html"><b>04</b> Categories &amp; templates</a><a class="side-link " href="custom-title.html"><b>05</b> Custom title &amp; styling</a><a class="side-link " href="single-hud-button.html"><b>06</b> HUD button &amp; editor</a><a class="side-link " href="startup-hud-button.html"><b>07</b> Startup HUD button visibility</a><a class="side-link active" href="button-artwork.html"><b>08</b> Button artwork &amp; background</a><a class="side-link " href="web.html"><b>09</b> HTML, CSS &amp; JavaScript</a><a class="side-link " href="design.html"><b>10</b> Design &amp; scaling</a><a class="side-link " href="startup.html"><b>11</b> Android &amp; startup</a><a class="side-link " href="troubleshooting.html"><b>12</b> Troubleshooting</a><a class="side-link " href="compatibility.html"><b>13</b> Compatibility</a><a class="side-link " href="github-pages.html"><b>14</b> GitHub Pages setup</a></nav><p id="empty" hidden>No matching page</p><div class="sidebar-footer"><a href="https://github.com/RealBatu20/BadlionClientUILibrary">GitHub repository</a><div class="note">Independent community UI library.</div></div></aside><main class="main"><header class="topbar"><div>BADLIONMENUUI / <span>BUTTON ARTWORK &AMP; BACKGROUND</span></div><div><a href="https://github.com/RealBatu20/BadlionClientUILibrary">Source</a><a href="https://github.com/RealBatu20/BadlionClientUILibrary/issues">Issues</a></div></header><div class="article"><div class="eyebrow">MINECRAFT BEDROCK · ANDROID ARM64 · LEVILAUNCHROID</div><article><h1>v1.1.6 artwork hotfix — remove Levi’s extra square backdrop</h1>
+<p>The Badlion launcher uses the two supplied template compositions:</p>
+<ul>
+<li><code>assets/badlion_button_normal.png</code>: original Levi <em>before</em> (<code>levi_template_bfr.png</code>) plus Badlion logo.</li>
+<li><code>assets/badlion_button_pressed.png</code>: original Levi <em>after</em> (<code>levi_template_aft.png</code>) plus Badlion logo.</li>
+</ul>
+<p>Both PNGs already include the pixel-art square frame. <strong>Do not add another Android square behind them.</strong> On LeviLaunchroid v1.6.1, <code>ExternalButtonOverlay.createButtonBackground()</code> adds an independent <code>GradientDrawable</code> background and stroke to every C++ registered button. Its default <code>Keycap</code> styling produces the broad gray outer square visible in the screenshot even when the PNG itself looks correct.</p>
+<h2>Native fix</h2>
+<p>In <code>src/BadlionMenu.cpp</code>, when registering the one <code>pl::modmenu::ButtonInfo</code>:</p>
+<pre><code class="language-cpp">button.stylePreset = pl::modmenu::ButtonStylePreset::Keycap;
+button.normalBgColor = 0x01000000u;
+button.activeBgColor = 0x01000000u;
+button.borderColor = 0x01000000u;
+button.iconFormat = pl::modmenu::ButtonIconFormat::Png;
+button.iconData = readBytes(modDir / &quot;resources&quot; / &quot;badlion_button_normal.png&quot;);
+button.activeIconData = readBytes(modDir / &quot;resources&quot; / &quot;badlion_button_pressed.png&quot;);
+</code></pre>
+<p>The alpha channel is <strong>1/255</strong>, so the wrapper fill and border are visually imperceptible. This is intentional: Levi uses an <code>override != 0</code> check, so <code>0x00000000</code> would wrongly fall back to its opaque default. The PNG artwork itself is not altered.</p>
+<p>This keeps the genuine Levi on-screen control (one button), its click callback, native HUD Editor drag/resize, and the v1.1.6 <code>Show Everywhere</code> loading-screen setting. No second fixed-position or WebView floating button is created. Startup availability still depends on Levi initializing its native button overlay.</p>
+<h2>Confirm on Android</h2>
+<ol>
+<li>Remove or disable the old 1.1.6 build, install the updated <code>.levipack</code>, and restart LeviLaunchroid.</li>
+<li>Inspect the Badlion launcher icon on the loading screen. It should show <strong>just the normal template PNG</strong>, without the larger plain gray background panel.</li>
+<li>Tap it to open/close the HTML menu; it must still work.</li>
+<li>Open Levi HUD Editor, drag/resize the <strong>same</strong> button, save, and verify its position persists.</li>
+<li>Confirm the pressed state uses <code>badlion_button_pressed.png</code> and that there is only one Badlion button.</li>
+</ol>
+<p>This patch was compiled and checked against Levi’s v1.6.1 Java source. It has not been confirmed on a physical Android device in this environment.</p>
+</article><div class="jump"><a href="startup-hud-button.html">← Startup HUD button visibility</a><a href="web.html">HTML, CSS &amp; JavaScript →</a></div><div class="note">v1.1.6 · Native device compatibility not validated for this release.</div></div></main></div><script defer src="assets/site.js"></script></body></html>

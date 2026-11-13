@@ -26,6 +26,7 @@ std::string g_modDir;
 jobject g_app = nullptr, g_observer = nullptr, g_task = nullptr, g_activity = nullptr;
 jobject g_root = nullptr, g_web = nullptr, g_decor = nullptr;
 bool g_lastVisible = false;
+bool g_loggedLeviShowEverywhere = false;
 
 bool check(JNIEnv* e, const char* where) {
  if (!e->ExceptionCheck()) return true;
@@ -232,11 +233,67 @@ void raiseView(JNIEnv* e,jobject view){
  if(elevation)e->CallVoidMethod(view,elevation,jfloat(128.0f));
  if(invalidate)e->CallVoidMethod(view,invalidate);
 }
+// LeviLaunchroid 1.6.1 normally hides external HUD buttons until the game HUD
+// is active. Its built-in InbuiltOverlayManager checks the *same* button's
+// persistent "show everywhere" preference when it is on a loading/title screen.
+// The key is derived by ExternalModBridge.ExternalButton.positionKey():
+// "external_button:" + buttonId. This is not a second Android overlay:
+// registration, icon, saved position, size and HUD Editor all remain Levi-owned.
+// Call on the Activity UI thread; no hidden API, memory patch or fake button.
+void enableLeviButtonOnAllScreens(JNIEnv* e){
+ if(!g_activity)return;
+ jclass mgrClass=e->FindClass("org/levimc/launcher/core/mods/inbuilt/manager/InbuiltModManager");
+ if(!check(e,"find Levi InbuiltModManager")||!mgrClass)return;
+ jmethodID get=e->GetStaticMethodID(mgrClass,"getInstance",
+    "(Landroid/content/Context;)Lorg/levimc/launcher/core/mods/inbuilt/manager/InbuiltModManager;");
+ if(!check(e,"Levi InbuiltModManager.getInstance")||!get)return;
+ jobject mgr=e->CallStaticObjectMethod(mgrClass,get,g_activity);
+ if(!check(e,"Levi InbuiltModManager instance")||!mgr)return;
+ jstring buttonKey=e->NewStringUTF("external_button:badlionmenuui.launcher");
+ jmethodID isEverywhere=e->GetMethodID(mgrClass,"isOverlayShowEverywhere", "(Ljava/lang/String;)Z");
+ jmethodID setEverywhere=e->GetMethodID(mgrClass,"setOverlayShowEverywhere", "(Ljava/lang/String;Z)V");
+ if(!check(e,"Levi show-everywhere methods")||!isEverywhere||!setEverywhere){
+  e->DeleteLocalRef(buttonKey);e->DeleteLocalRef(mgr);e->DeleteLocalRef(mgrClass);return;
+ }
+ bool wasEnabled=e->CallBooleanMethod(mgr,isEverywhere,buttonKey)==JNI_TRUE;
+ if(!check(e,"read Levi show-everywhere")){
+  e->DeleteLocalRef(buttonKey);e->DeleteLocalRef(mgr);e->DeleteLocalRef(mgrClass);return;
+ }
+ if(!wasEnabled){
+  e->CallVoidMethod(mgr,setEverywhere,buttonKey,JNI_TRUE);
+  if(check(e,"enable Levi show-everywhere")){
+   LOGA("Enabled startup visibility for Levi HUD button via Show Everywhere: external_button:badlionmenuui.launcher");
+   // Prompt a visibility recalculation now; do not wait for the game HUD.
+   jclass overlays=e->FindClass("org/levimc/launcher/core/mods/inbuilt/overlay/InbuiltOverlayManager");
+   if(overlays){
+    jmethodID current=e->GetStaticMethodID(overlays,"getInstance",
+     "()Lorg/levimc/launcher/core/mods/inbuilt/overlay/InbuiltOverlayManager;");
+    if(current){
+     jobject instance=e->CallStaticObjectMethod(overlays,current);
+     if(instance){
+      jmethodID refresh=e->GetMethodID(overlays,"refreshRuntimeVisibility","()V");
+      if(refresh)e->CallVoidMethod(instance,refresh);
+      e->DeleteLocalRef(instance);
+     }
+    }
+    e->DeleteLocalRef(overlays);
+   }
+   check(e,"refresh Levi HUD visibility");
+  }
+ }
+ if(!g_loggedLeviShowEverywhere){
+  LOGA("Levi HUD button remains HUD-editor-managed and set to Show Everywhere");
+  g_loggedLeviShowEverywhere=true;
+ }
+ e->DeleteLocalRef(buttonKey);e->DeleteLocalRef(mgr);e->DeleteLocalRef(mgrClass);
+}
 // Called exclusively by android's UI thread through UiTask.run() or a lifecycle callback.
 void uiTick(JNIEnv* e){
  std::lock_guard guard(g_lock);
  if(!g_enabled){detachWidget(e);return;}
  if(!g_activity)return;
+ // Keep the genuine Levi external button visible before the gameplay HUD is active.
+ enableLeviButtonOnAllScreens(e);
  if(!g_root){
   auto html=readHtml();if(html.empty()){LOGA("Missing HTML resource");return;}
   jclass act=e->FindClass("android/app/Activity");
@@ -359,6 +416,7 @@ void setActivity(JNIEnv* e,jobject activity){
  // Lifecycle transitions are on the UI thread; safely detach the old activity.
  if(g_activity)detachWidget(e);
  replace(e,g_activity,activity);
+ g_loggedLeviShowEverywhere=false;
  schedule(e);
 }
 void JNICALL activityCreated(JNIEnv* e,jobject,jobject a,jobject){setActivity(e,a);}

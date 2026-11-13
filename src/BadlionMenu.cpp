@@ -207,7 +207,16 @@ bool modEnable(void*,void* context){
   return true; // Avoid disabling the native UI library for optional menu failure.
  }
  LOG("module registration succeeded");
- pl::modmenu::ButtonInfo button;button.buttonId=std::string(kButtonId);button.moduleId=std::string(kModuleId);button.displayName="Badlion Client Menu";button.modId=g_modDir.filename().string();button.label="Badlion";button.androidKeyCode=0;button.behavior=pl::modmenu::ButtonBehavior::Click;button.defaultVisible=true;button.stylePreset=pl::modmenu::ButtonStylePreset::Keycap;button.widthScale=1.0f;button.heightScale=1.0f;button.iconFormat=pl::modmenu::ButtonIconFormat::Png;button.hideLabelWhenIconPresent=true;
+ pl::modmenu::ButtonInfo button;button.buttonId=std::string(kButtonId);button.moduleId=std::string(kModuleId);button.displayName="Badlion Client Menu";button.modId=g_modDir.filename().string();button.label="Badlion";button.androidKeyCode=0;button.behavior=pl::modmenu::ButtonBehavior::Click;button.defaultVisible=true;button.stylePreset=pl::modmenu::ButtonStylePreset::Keycap;
+ // Levi ExternalButtonOverlay creates an extra GradientDrawable square by default.
+ // Its color override checks "!= 0", so ARGB 0x00000000 would fall back to
+ // the launcher's opaque keycap. Use nonzero ARGB with alpha=1 (1/255)
+ // to suppress the wrapper, leaving ONLY the composited normal/pressed PNG.
+ // The button is still a genuine movable/resizable Levi HUD overlay.
+ button.normalBgColor=0x01000000u;
+ button.activeBgColor=0x01000000u;
+ button.borderColor=0x01000000u;
+ button.widthScale=1.0f;button.heightScale=1.0f;button.iconFormat=pl::modmenu::ButtonIconFormat::Png;button.hideLabelWhenIconPresent=true;
  button.iconData=readBytes(g_modDir/"resources"/"badlion_button_normal.png");
  button.activeIconData=readBytes(g_modDir/"resources"/"badlion_button_pressed.png");
  button.onEvent=buttonClicked;

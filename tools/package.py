@@ -82,6 +82,6 @@ with zipfile.ZipFile(source,'r') as z:
 report={'manifest':manifest,'arm64_sha256':hashlib.sha256(blob).hexdigest(),
  'artifacts':{p.name:{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in [zpath,outso,source]},
  'package_entries':names,'source_file_count':len(zipfile.ZipFile(source).namelist()),
- 'notes':['ARM64 compiled and ELF checked','ZIP CRC and one-so/manifest rules passed','3 real toggle templates / dynamically rendered category UI checked','Only native Levi editable HUD button; no second WebView launcher','Offline-generated JNI DEX bundled and integrity-checked','Automatic Activity bootstrap compiled; v1.1.5 unverified on physical device']}
+ 'notes':['ARM64 compiled and ELF checked','ZIP CRC and one-so/manifest rules passed','3 real toggle templates / dynamically rendered category UI checked','Only native Levi editable HUD button; no second WebView launcher','Offline-generated JNI DEX bundled and integrity-checked','Automatic Activity bootstrap compiled; v1.1.6 unverified on physical device']}
 (DEST/'BadlionMenuUI_build_report.json').write_text(json.dumps(report,indent=2)+'\n')
 print(json.dumps(report,indent=2))

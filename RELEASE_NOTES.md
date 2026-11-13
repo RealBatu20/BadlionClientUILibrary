@@ -1,11 +1,7 @@
-# BadlionMenuUI 1.1.5 — Single editable HUD button
+# v1.1.6 — Levi Button Background Hotfix (rebuilt November 13, 2026)
 
-- Removed the independent fixed-position Android/WebView floating button which could not be moved by Levi HUD Editor and persisted on unrelated screens.
-- Kept the native `pl::modmenu::registerButton` icon, pressed icon, real callback and Levi HUD Editor positioning/resizing.
-- Removed the HTML-only floating logo fallback; installed menu now opens through the Levi native launcher button or programmatically with `BadlionUI_SetVisible`.
-- Removed the three-line `≡` shortcut beside Search in all layouts. Standard vs Square tile sizing remains in Settings.
-- Fixed the 320px viewport centering regression caused by oversized unscaled CSS grid tracks.
-- Preserved existing developer module callbacks and custom categories, three template cards, title customization, Normal/Compact modes, profiles, themes and WebView startup menu host.
-- Updated the full source, tests and 12-page offline GitHub Pages docs. NDK compilation and Chromium tests passed; device verification is still needed.
+This is an updated binary of **1.1.6**, not the earlier build with the same version number. Uninstall the earlier build before importing. The native registered button sets nonzero, nearly transparent ARGB 0x01000000 for normal/active background and border to suppress LeviLaunchroid 1.6.1's `ExternalButtonOverlay` GradientDrawable wrapper. Only the supplied before/after PNGs remain visible. The single Levi HUD button, startup Show Everywhere preference, position/size editor, and all HTML features are unchanged.
 
-**Note:** The sole Levi button may not render during early startup before the native HUD is ready. This is intentional to avoid a second non-editable overlay. Full HTML menu may still attach during startup.
+Read `docs/FIX_BUTTON_ARTWORK_BACKGROUND.md` or the [docs page](docs/button-artwork.html). Nine offline tests pass. Android device behavior remains unverified.
+
+The Termux publisher (`scripts/publish_badlion_v116_termux.sh`) uploads this rebuilt archive, creating a remote backup branch before updating main.

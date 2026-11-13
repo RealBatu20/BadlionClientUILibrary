@@ -41,7 +41,7 @@ No emulator or Android phone was connected to this build environment. Compilatio
 
 ## User-facing scope
 
-Only **three** starter buttons are built in (`PvP`, `Hypixel`, `Visual`). Their native callbacks log toggle changes but implement no Bedrock gameplay effects. Developers own real features and can register custom categories through the new exported C ABI. The All filter is synthetic; it displays all visible native modules in all registered categories. Browser and ARM64 compilation tests have been rerun for v1.1.5; this is not a substitute for physical Android runtime validation.
+Only **three** starter buttons are built in (`PvP`, `Hypixel`, `Visual`). Their native callbacks log toggle changes but implement no Bedrock gameplay effects. Developers own real features and can register custom categories through the new exported C ABI. The All filter is synthetic; it displays all visible native modules in all registered categories. Browser and ARM64 compilation tests have been rerun for v1.1.6; this is not a substitute for physical Android runtime validation.
 
 ## v1.1.2 visible-world overlay regression
 
@@ -54,3 +54,5 @@ Run `python3 tests/test_category_templates.py` to verify that All contains all t
 ## HUD button regression
 
 Run `python3 tests/test_single_hud_button.py` to check that the native Levi button is still registered and that no independent Android/Web fallback launcher is emitted. This source/browser test cannot verify the HUD editor on a real device.
+
+Button artwork: v1.1.6 includes a wrapper-background override (`0x01000000` ARGB) to suppress the launcher-generated extra gray square; see [FIX_BUTTON_ARTWORK_BACKGROUND.md](FIX_BUTTON_ARTWORK_BACKGROUND.md).

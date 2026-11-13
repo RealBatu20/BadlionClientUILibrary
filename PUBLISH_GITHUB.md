@@ -33,3 +33,9 @@ A Pages workflow does not prove that Pages has been enabled. Verify under the Gi
 ## Release integrity
 
 The `releases/1.1.4/` folder contains the exact compiled artifacts. File checksums are in `releases/1.1.4/BadlionMenuUI_build_report.json`. The underlying compiled binary has not been retested on a physical Android device in this release; browser and ARM64 build checks are independent verification steps.
+
+## v1.1.6 Native button artwork hotfix
+
+Use the **new** `BadlionClientUILibrary_GitHub_Ready_v1.1.6.zip` with `publish_badlion_v116_termux.sh`. The script checks that `src/BadlionMenu.cpp` contains the transparent background and border overrides, preventing accidental publication of the older opaque button build. It uses `git push --force-with-lease` and creates a backup branch first.
+
+See `docs/FIX_BUTTON_ARTWORK_BACKGROUND.md`.
