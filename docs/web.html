@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="BadlionMenuUI native C++ / HTML documentation: HTML, CSS &amp; JavaScript"><title>HTML, CSS &amp; JavaScript — BadlionMenuUI Docs</title><link rel="stylesheet" href="assets/site.css"></head><body><button id="mob" aria-label="Toggle docs navigation">☰</button><div class="shell"><aside class="sidebar"><div class="identity"><img src="assets/badlion_logo.png" alt="Badlion-style logo"><div><strong>BadlionMenuUI</strong><small>C/C++ · Java/DEX · v1.1.5</small></div></div><input id="docSearch" class="search" type="search" placeholder="Filter documentation…" aria-label="Filter documentation links"><div class="navcaption">DEVELOPER DOCUMENTATION</div><nav><a class="side-link " href="index.html"><b>01</b> Overview</a><a class="side-link " href="quick-start.html"><b>02</b> Quick start</a><a class="side-link " href="developer-api.html"><b>03</b> Developer C/C++ API</a><a class="side-link " href="categories.html"><b>04</b> Categories &amp; templates</a><a class="side-link " href="custom-title.html"><b>05</b> Custom title &amp; styling</a><a class="side-link " href="single-hud-button.html"><b>06</b> HUD button &amp; editor</a><a class="side-link active" href="web.html"><b>07</b> HTML, CSS &amp; JavaScript</a><a class="side-link " href="design.html"><b>08</b> Design &amp; scaling</a><a class="side-link " href="startup.html"><b>09</b> Android &amp; startup</a><a class="side-link " href="troubleshooting.html"><b>10</b> Troubleshooting</a><a class="side-link " href="compatibility.html"><b>11</b> Compatibility</a><a class="side-link " href="github-pages.html"><b>12</b> GitHub Pages setup</a></nav><p id="empty" hidden>No matching page</p><div class="sidebar-footer"><a href="https://github.com/RealBatu20/BadlionClientUILibrary">GitHub repository</a><div class="note">Independent community UI library.</div></div></aside><main class="main"><header class="topbar"><div>BADLIONMENUUI / <span>HTML, CSS &AMP; JAVASCRIPT</span></div><div><a href="https://github.com/RealBatu20/BadlionClientUILibrary">Source</a><a href="https://github.com/RealBatu20/BadlionClientUILibrary/issues">Issues</a></div></header><div class="article"><div class="eyebrow">MINECRAFT BEDROCK · ANDROID ARM64 · LEVILAUNCHROID</div><article><h1>Full HTML/CSS/JavaScript menu — template and category development</h1>
+<p>Edit <code>web/src/menu.js</code>, <code>web/src/menu.css</code>, or <code>web/src/index.tpl.html</code>, <strong>not</strong> the generated HTML output directly. Regenerate with <code>python3 web/src/build_web.py</code> and open <code>web/index.html</code> in a browser for an offline preview. The generated page inlines all CSS, JS and the provided Badlion logo; the same HTML is packaged in <code>resources/ui/index.html</code> in <code>.levipack</code>.</p>
+<h2>Catalog and category rendering</h2>
+<p>The source now starts with <strong>exactly three</strong> <code>DEFAULTS</code> (PvP/Hypixel/Visual button templates). The built-in category list has IDs <code>PvP</code>, <code>Hypixel</code>, and <code>Visual</code>. <code>All</code> is an aggregate filter created by the sidebar renderer. There are no hardcoded Armor Status, CPS, Bedwars, etc. cards. Clicking template switches invokes a real logging callback on the native build; browser preview produces a developer console message. No Minecraft gameplay effects are present.</p>
+<p><code>renderFilters()</code> renders <code>#categoryFilters</code> dynamically from <code>state.categories</code>. Native snapshot <code>categories</code> and <code>modules</code> replace local browser data when <code>window.BadlionHost</code> exists. Each registered module’s <code>.category</code> is compared exactly to the selected category ID. Search additionally searches name, ID, description and category. <code>renderModules()</code> creates module cards and the <code>TEMPLATE</code> label only when <code>module.template===true</code>.</p>
+<h2>Browser-side public API</h2>
+<p>In standalone mode (without <code>window.BadlionHost</code>), the JavaScript API is useful for previewing a mod’s custom menu design:</p>
+<pre><code class="language-js">BadlionUI.registerCategory({
+  id: 'my_mod.utilities',
+  name: 'Utilities',
+  icon: '◇'
+});
+BadlionUI.registerModule({
+  id: 'my_mod.clock', name: 'Clock', category: 'my_mod.utilities', icon: '◷',
+  description: 'A button with a browser callback', enabled: false,
+  onToggle(enabled, id) { console.log(id, enabled); }
+});
+BadlionUI.getCategories();
+BadlionUI.setTemplatesVisible(false); // hide starter cards, keep developer cards
+BadlionUI.setMode('compact');
+// When finished: unregisterModule first, then unregisterCategory.
+BadlionUI.unregisterModule('my_mod.clock');
+BadlionUI.unregisterCategory('my_mod.utilities');
+</code></pre>
+<p><code>registerCategory</code> fails on duplicate IDs, invalid IDs or reserved <code>All</code>; <code>registerModule</code> fails on unknown categories or duplicate IDs. <code>unregisterCategory</code> fails while it still has modules. Browser callbacks execute synchronously with successful toggles; if the callback throws, the state change is rejected. Built-in category and template records are not removable through these JavaScript methods. The Settings tab can hide all three templates.</p>
+<p><strong>Important:</strong> On Android with a live <code>window.BadlionHost</code>, these JavaScript registration methods intentionally return false. Developers must register through the exported native C API from their own mod so callbacks can safely be tracked by the preloader. <code>BadlionHost.snapshot()</code> provides serialized data; <code>BadlionHost.setEnabled()</code> invokes <code>BadlionUI_SetEnabled()</code> via JNI, which fires your registered native callback.</p>
+<h2>Existing UI features preserved</h2>
+<ul>
+<li>Normal layout: 820 × 460 CSS design pixels, with a six-column grid for developer modules; when only three templates are present in All, they are displayed as a three-column example row.</li>
+<li>Compact layout: 570 × 475 with denser cards; portrait mode: 380 × 690 reference design with two columns and automatic scaling.</li>
+<li>Themes Regular, Opacity, Insider; theme accent and opacity controls.</li>
+<li>Profile save/load/delete; each profile stores per-module IDs and enabled states and applies toggles through real callbacks when available.</li>
+<li>Edit GUI / drag header; bounded offsets, UI Size slider and auto-fit based on <code>visualViewport</code>/<code>innerWidth</code>/<code>innerHeight</code>.</li>
+<li>Optional module-detail dialog; search; square sizes through Settings. There is no browser-only floating logo because only the native Levi HUD launcher should appear on-device.</li>
+</ul>
+<p>The native Levi floating button is created by <code>src/BadlionMenu.cpp</code>; <code>src/AndroidAutoHost.cpp</code> owns only the full HTML menu WebView, not a separate floating button. It cannot create a duplicate uneditable button.</p>
+<h2>Native state vs. local storage</h2>
+<p>The UI persists appearance, profiles, mode and local <code>templatesVisible</code> in <code>localStorage</code> (<code>badlion-ui-v2</code> key for upgrade continuity). Native snapshot also supplies <code>templatesVisible</code>. A template card is displayed only if <strong>both</strong> the native flag and the local UI setting allow it. The developer can hide the three templates globally through <code>BadlionUI_SetTemplatesVisible(0)</code>. UI users can hide them in Settings without impacting native callback registration or custom modules.</p>
+<h2>Test the result</h2>
+<pre><code class="language-bash">python3 web/src/build_web.py
+python3 tests/test_web.py
+python3 tests/test_full_menu.py
+python3 tests/test_category_templates.py
+python3 tests/test_overlay_regression.py
+</code></pre>
+<p><code>test_category_templates.py</code> tests all four built-in filters, custom categories, callback invocations, category removal constraints, native snapshot updates and suppression of the three examples. Tests run in desktop Chromium; actual WebView and device behavior must still be validated on Android.</p>
+<h2>Customize the topbar title (v1.1.5)</h2>
+<p>The markup is <code>&lt;span class=&quot;brand&quot; id=&quot;brandTitle&quot;&gt;BADLION CLIENT&lt;/span&gt;</code>. <code>menu.js</code> updates its <code>textContent</code> (not <code>innerHTML</code>), avoiding markup injection. Change it from Settings → Menu Header Text or call <code>BadlionUI.setTitle('MY UI LIBRARY')</code>. The Reset button returns to the developer’s native <code>BadlionUI_SetTitle()</code> value. Keep the <code>.header .brand</code> CSS rules intact to preserve the condensed Impact / Arial Narrow style. An ellipsis prevents overly long titles from obscuring the close button.</p>
+<p>There is no Premium UI: the toolbar contains only Mods, Settings, and Profiles.</p>
+<h2>v1.1.5 launcher and topbar</h2>
+<p><code>#fallbackFloat</code> was removed from the standalone HTML and is no longer created by the Android host; installed in-game menu reopening relies on the native Levi HUD button. <code>#squares</code> was removed from the topbar and from the JS event wiring; use Settings → Module Square Size for square mode.</p>
+</article><div class="jump"><a href="single-hud-button.html">← HUD button &amp; editor</a><a href="design.html">Design &amp; scaling →</a></div><div class="note">v1.1.5 · Native device compatibility not validated for this release.</div></div></main></div><script defer src="assets/site.js"></script></body></html>

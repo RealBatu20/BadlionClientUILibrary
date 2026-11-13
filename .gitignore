@@ -1,0 +1,14 @@
+# Rebuild outputs from native toolchains
+/build/
+/dist/
+**/__pycache__/
+*.py[cod]
+*.swp
+.DS_Store
+
+# Never commit external SDK binaries or Minecraft proprietary game libraries
+android-ndk-*/
+libminecraftpe.so
+libpreloader.so
+*.keystore
+*.jks

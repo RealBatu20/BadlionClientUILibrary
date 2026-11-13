@@ -1,0 +1,144 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="BadlionMenuUI native C++ / HTML documentation: Developer C/C++ API"><title>Developer C/C++ API — BadlionMenuUI Docs</title><link rel="stylesheet" href="assets/site.css"></head><body><button id="mob" aria-label="Toggle docs navigation">☰</button><div class="shell"><aside class="sidebar"><div class="identity"><img src="assets/badlion_logo.png" alt="Badlion-style logo"><div><strong>BadlionMenuUI</strong><small>C/C++ · Java/DEX · v1.1.5</small></div></div><input id="docSearch" class="search" type="search" placeholder="Filter documentation…" aria-label="Filter documentation links"><div class="navcaption">DEVELOPER DOCUMENTATION</div><nav><a class="side-link " href="index.html"><b>01</b> Overview</a><a class="side-link " href="quick-start.html"><b>02</b> Quick start</a><a class="side-link active" href="developer-api.html"><b>03</b> Developer C/C++ API</a><a class="side-link " href="categories.html"><b>04</b> Categories &amp; templates</a><a class="side-link " href="custom-title.html"><b>05</b> Custom title &amp; styling</a><a class="side-link " href="single-hud-button.html"><b>06</b> HUD button &amp; editor</a><a class="side-link " href="web.html"><b>07</b> HTML, CSS &amp; JavaScript</a><a class="side-link " href="design.html"><b>08</b> Design &amp; scaling</a><a class="side-link " href="startup.html"><b>09</b> Android &amp; startup</a><a class="side-link " href="troubleshooting.html"><b>10</b> Troubleshooting</a><a class="side-link " href="compatibility.html"><b>11</b> Compatibility</a><a class="side-link " href="github-pages.html"><b>12</b> GitHub Pages setup</a></nav><p id="empty" hidden>No matching page</p><div class="sidebar-footer"><a href="https://github.com/RealBatu20/BadlionClientUILibrary">GitHub repository</a><div class="note">Independent community UI library.</div></div></aside><main class="main"><header class="topbar"><div>BADLIONMENUUI / <span>DEVELOPER C/C++ API</span></div><div><a href="https://github.com/RealBatu20/BadlionClientUILibrary">Source</a><a href="https://github.com/RealBatu20/BadlionClientUILibrary/issues">Issues</a></div></header><div class="article"><div class="eyebrow">MINECRAFT BEDROCK · ANDROID ARM64 · LEVILAUNCHROID</div><article><h1>Developer API — C++ module cards, callback routing and custom categories</h1>
+<p>This is a <strong>UI library</strong>, not a collection of premade Minecraft modifications. The only bundled module cards are PvP/Hypixel/Visual <strong>templates</strong>. All mod behavior, verified game signatures, rendering and thread dispatch are supplied by the developer.</p>
+<h2>Stable ABI and exported symbols</h2>
+<p>Include <code>include/BadlionUI.h</code> from the source ZIP. The module descriptor keeps the original ABI v1 layout, so old plugins that register properly named modules can still use it. This update adds a separate category descriptor and new functions, without changing existing structure fields:</p>
+<table>
+<thead>
+<tr>
+<th>Native function</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BadlionUI_SetTitle(&quot;MY CLIENT&quot;)</code></td>
+<td>Sets native menu header without changing its condensed typography; 1 on success</td>
+</tr>
+<tr>
+<td><code>BadlionUI_GetTitle(char*,capacity)</code></td>
+<td>Required size (including NUL), or copies title into a sufficient buffer</td>
+</tr>
+<tr>
+<td><code>BadlionUI_GetAbiVersion()</code></td>
+<td>Returns <code>1</code> (backward compatible)</td>
+</tr>
+<tr>
+<td><code>BadlionUI_RegisterCategory(&amp;descriptor)</code></td>
+<td>Creates or updates a custom category; returns <code>1</code> on success</td>
+</tr>
+<tr>
+<td><code>BadlionUI_UnregisterCategory(id)</code></td>
+<td>Deletes empty, custom categories only</td>
+</tr>
+<tr>
+<td><code>BadlionUI_RegisterModule(&amp;descriptor)</code></td>
+<td>Adds/replaces a callback-backed card under a <strong>registered</strong> category ID</td>
+</tr>
+<tr>
+<td><code>BadlionUI_UnregisterModule(id)</code></td>
+<td>Removes developer module; cannot remove built-in templates</td>
+</tr>
+<tr>
+<td><code>BadlionUI_SetEnabled(id, 0/1)</code></td>
+<td>Updates state and calls the descriptor callback when changed</td>
+</tr>
+<tr>
+<td><code>BadlionUI_GetEnabled(id)</code></td>
+<td><code>0</code>, <code>1</code> or <code>-1</code> if ID unknown</td>
+</tr>
+<tr>
+<td><code>BadlionUI_SetTemplatesVisible(0/1)</code></td>
+<td>Hides/shows all 3 starter cards in native snapshots</td>
+</tr>
+<tr>
+<td><code>BadlionUI_GetTemplatesVisible()</code></td>
+<td>Returns native template visibility flag</td>
+</tr>
+<tr>
+<td><code>BadlionUI_SetVisible(0/1)</code> / <code>GetVisible()</code></td>
+<td>Android WebView visibility request/state</td>
+</tr>
+<tr>
+<td><code>BadlionUI_SetCompact(0/1)</code> / <code>GetCompact()</code></td>
+<td>Layout flag</td>
+</tr>
+<tr>
+<td><code>BadlionUI_SetOpacity(40..100)</code></td>
+<td>Persisted panel opacity</td>
+</tr>
+<tr>
+<td><code>BadlionUI_Snapshot(buffer,capacity)</code></td>
+<td>JSON with <code>abi</code>, <code>title</code>, <code>mode</code>, <code>visible</code>, <code>opacity</code>, <code>templatesVisible</code>, <code>categories</code>, and <code>modules</code></td>
+</tr>
+</tbody>
+</table>
+<p>A <code>BadlionCategoryDescriptor</code> is <code>{const char* id, const char* name, const char* icon, int sort_order}</code>. Its <code>id</code> uses 1–95 ASCII alphanumeric/dot/underscore/hyphen, <code>All</code> is reserved, name length 1–63 bytes, optional icon &lt;=31 bytes. Built-in <code>PvP</code>, <code>Hypixel</code>, <code>Visual</code> categories are permanent. Sort order: built-ins 10/20/30; custom values clamped to 40–10000.</p>
+<p>A <code>BadlionModuleDescriptor</code> is <code>{id,name,category,icon,description,initially_enabled,on_toggle,userdata}</code>. Category is its stable <strong>ID</strong>, not a user-facing label. The <code>on_toggle</code> callback is <code>void(const char* moduleId, int enabled, void* userdata)</code> and is called <strong>outside the library registry mutex</strong>. String memory is valid for the duration of that callback; copy it for later use. Your <code>userdata</code> belongs to your mod, and must outlive all callbacks. The UI does not synthesize gameplay behavior.</p>
+<h2>Two registration workflows</h2>
+<h3>Place a card under PvP, Hypixel or Visual</h3>
+<pre><code class="language-cpp">static std::atomic&lt;bool&gt; g_enabled{false};
+static void onSwitch(const char*,int enabled,void*){
+    g_enabled.store(enabled!=0,std::memory_order_release);
+}
+BadlionModuleDescriptor desc{
+   &quot;my_mod.pvp_overlay&quot;, &quot;PvP Overlay&quot;, &quot;PvP&quot;, &quot;⚔&quot;,
+   &quot;Overlay implemented by my mod&quot;, 0, &amp;onSwitch, nullptr
+};
+// call the resolved BadlionUI_RegisterModule(&amp;desc)
+</code></pre>
+<p><strong>All</strong> will show this module, and <strong>PvP</strong> will show it alongside the PvP template if templates are still visible.</p>
+<h3>Create your own custom category</h3>
+<pre><code class="language-cpp">BadlionCategoryDescriptor category{&quot;my_mod.hud&quot;, &quot;HUD Widgets&quot;, &quot;◈&quot;, 100};
+// registerCategory(&amp;category) before registering modules
+BadlionModuleDescriptor desc{
+    &quot;my_mod.timer&quot;, &quot;Stopwatch&quot;, &quot;my_mod.hud&quot;, &quot;◷&quot;,
+    &quot;Timer drawn by my mod&quot;, 0, &amp;onSwitch, nullptr
+};
+// registerModule(&amp;desc)
+</code></pre>
+<p>The sidebar now includes a new <strong>HUD Widgets</strong> filter and your card appears under it and All. Categories with no matching modules show an empty-state message. Unregister the module first, then the category. Attempting to remove a category still in use returns <code>0</code>; attempting to register a module with an unknown category returns <code>0</code>.</p>
+<h2>Loading and unloading from a separately compiled mod</h2>
+<p>The companion source file <code>examples/DeveloperMod.cpp</code> includes dynamic linking to the <strong>already loaded</strong> <code>libbadlionmenuui.so</code> using <code>dlopen(..., RTLD_NOLOAD)</code> and <code>dlsym</code> for all four registration functions. Do not embed a second copy of the library inside your mod. Preloader mod ordering is not guaranteed: if the dependency is not loaded yet, retry at a later lifecycle checkpoint rather than busy-looping.</p>
+<p>Before your mod unloads, call <code>BadlionUI_UnregisterModule</code> for each module, then <code>BadlionUI_UnregisterCategory</code> for your custom categories, then release the dynamic library handle. Ensure no concurrently executing callback can outlive the code or userdata it uses; synchronize with your own shutdown lifecycle. Callbacks can originate from Java <code>@JavascriptInterface</code> threads, not necessarily the Minecraft render/game thread. Use atomics or a safe task queue and execute gameplay operations only from your own verified game-thread integration.</p>
+<p>Do not rely on the starter templates to execute game logic. They are functional button <strong>examples</strong> whose callback logs a diagnostic message. Their IDs are <code>badlion.template.pvp</code>, <code>badlion.template.hypixel</code>, <code>badlion.template.visual</code>. They are optional, user-hideable UI elements. They do not appear as fake gameplay entries.</p>
+<h2>Snapshot JSON</h2>
+<pre><code class="language-json">{
+  &quot;abi&quot;: 1,
+  &quot;mode&quot;: &quot;normal&quot;,
+  &quot;visible&quot;: true,
+  &quot;opacity&quot;: 95,
+  &quot;templatesVisible&quot;: true,
+  &quot;categories&quot;: [
+    {&quot;id&quot;:&quot;PvP&quot;,&quot;name&quot;:&quot;PvP&quot;,&quot;icon&quot;:&quot;⚔&quot;,&quot;builtin&quot;:true},
+    {&quot;id&quot;:&quot;Hypixel&quot;,&quot;name&quot;:&quot;Hypixel&quot;,&quot;icon&quot;:&quot;ϟ&quot;,&quot;builtin&quot;:true},
+    {&quot;id&quot;:&quot;Visual&quot;,&quot;name&quot;:&quot;Visual&quot;,&quot;icon&quot;:&quot;◎&quot;,&quot;builtin&quot;:true},
+    {&quot;id&quot;:&quot;my_mod.hud&quot;,&quot;name&quot;:&quot;HUD Widgets&quot;,&quot;icon&quot;:&quot;◈&quot;,&quot;builtin&quot;:false}
+  ],
+  &quot;modules&quot;: [
+    {&quot;id&quot;:&quot;my_mod.timer&quot;,&quot;name&quot;:&quot;Stopwatch&quot;,&quot;category&quot;:&quot;my_mod.hud&quot;,&quot;icon&quot;:&quot;◷&quot;,
+     &quot;description&quot;:&quot;Timer drawn by my mod&quot;,&quot;enabled&quot;:false,&quot;template&quot;:false}
+  ]
+}
+</code></pre>
+<p>This JSON example omits other visible template cards for clarity. Exact catalog order is a library detail; use stable IDs. First query <code>BadlionUI_Snapshot(nullptr,0)</code> for the required byte count (including NUL), allocate that many bytes, then call it again. The registry can change between calls: handle a second returned required length if the buffer is too small.</p>
+<p>The WebView bridge reads the snapshot every refresh cycle. On the UI side, only the <strong>All</strong> aggregation filter is synthetic; all other sidebar buttons use the native <code>categories</code> array. There is no hardcoded 49-card game-feature catalog.</p>
+<h2>Persistence</h2>
+<p>Native module flags, compact mode, panel opacity and template visibility are persisted under <code>config/badlion_ui_state.txt</code>; the UI also stores profiles, scale, theme and its local template-filter preference in localStorage. A re-registered module ID can inherit a previously saved toggle state. If you require initial callbacks, check the state and initialize your gameplay system accordingly; registration alone does not guarantee an initial toggle event.</p>
+<h2>Related guides</h2>
+<ul>
+<li><code>CUSTOM_CATEGORIES_AND_TEMPLATES.md</code> — entire category lifecycle and browser demo.</li>
+<li><code>WEB_MENU_DEVELOPMENT.md</code> — HTML/JavaScript-side registration for offline previews.</li>
+<li><code>ANDROID_DEX_AUTOSTART.md</code> — how native state crosses into the WebView.</li>
+<li><code>COMPATIBILITY_AND_TESTING.md</code> — ABI, loader and device validation limits.</li>
+</ul>
+<h2>Customize menu header text (added v1.1.4)</h2>
+<p>The visible header preserves the original condensed <code>.brand</code> font (<code>Impact</code>, fallback <code>Arial Narrow</code>), size and weight; only the <strong>characters</strong> change.</p>
+<pre><code class="language-cpp">using SetTitleFn = int (*)(const char*);
+auto setTitle = reinterpret_cast&lt;SetTitleFn&gt;(dlsym(uiHandle, &quot;BadlionUI_SetTitle&quot;));
+if (setTitle) setTitle(&quot;BATU CLIENT&quot;);
+</code></pre>
+<p><code>BadlionUI_SetTitle</code> copies a nonempty UTF-8 string of at most 96 bytes and rejects ASCII control characters. It is per-process: call on every mod start. <code>BadlionUI_GetTitle</code> returns the required byte count including the terminating NUL, like the snapshot method. A user-specific override chosen under <strong>Settings → Menu Header Text</strong> lives in WebView localStorage and intentionally takes precedence until the user presses <strong>Use Developer Title</strong>. The standalone web API is <code>BadlionUI.setTitle('BATU CLIENT')</code>, <code>BadlionUI.getTitle()</code> and <code>BadlionUI.resetTitle()</code>.</p>
+<p>The Premium tab and its markup, logic and style were removed. Only <code>Mods</code>, <code>Settings</code>, and <code>Profiles</code> are present.</p>
+<h2>Launcher ownership (v1.1.5)</h2>
+<p>The launcher button is a registered Levi <code>pl::modmenu::ButtonInfo</code> and can be edited in Levi HUD Editor. Do not create a second Android floating WebView button. The square-size shortcut in the top toolbar has been removed, but Settings → Module Square Size still provides Standard/Square tiles. See <code>docs/FIX_SINGLE_HUD_BUTTON.md</code>.</p>
+</article><div class="jump"><a href="quick-start.html">← Quick start</a><a href="categories.html">Categories &amp; templates →</a></div><div class="note">v1.1.5 · Native device compatibility not validated for this release.</div></div></main></div><script defer src="assets/site.js"></script></body></html>

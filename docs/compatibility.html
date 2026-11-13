@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="BadlionMenuUI native C++ / HTML documentation: Compatibility"><title>Compatibility — BadlionMenuUI Docs</title><link rel="stylesheet" href="assets/site.css"></head><body><button id="mob" aria-label="Toggle docs navigation">☰</button><div class="shell"><aside class="sidebar"><div class="identity"><img src="assets/badlion_logo.png" alt="Badlion-style logo"><div><strong>BadlionMenuUI</strong><small>C/C++ · Java/DEX · v1.1.5</small></div></div><input id="docSearch" class="search" type="search" placeholder="Filter documentation…" aria-label="Filter documentation links"><div class="navcaption">DEVELOPER DOCUMENTATION</div><nav><a class="side-link " href="index.html"><b>01</b> Overview</a><a class="side-link " href="quick-start.html"><b>02</b> Quick start</a><a class="side-link " href="developer-api.html"><b>03</b> Developer C/C++ API</a><a class="side-link " href="categories.html"><b>04</b> Categories &amp; templates</a><a class="side-link " href="custom-title.html"><b>05</b> Custom title &amp; styling</a><a class="side-link " href="single-hud-button.html"><b>06</b> HUD button &amp; editor</a><a class="side-link " href="web.html"><b>07</b> HTML, CSS &amp; JavaScript</a><a class="side-link " href="design.html"><b>08</b> Design &amp; scaling</a><a class="side-link " href="startup.html"><b>09</b> Android &amp; startup</a><a class="side-link " href="troubleshooting.html"><b>10</b> Troubleshooting</a><a class="side-link active" href="compatibility.html"><b>11</b> Compatibility</a><a class="side-link " href="github-pages.html"><b>12</b> GitHub Pages setup</a></nav><p id="empty" hidden>No matching page</p><div class="sidebar-footer"><a href="https://github.com/RealBatu20/BadlionClientUILibrary">GitHub repository</a><div class="note">Independent community UI library.</div></div></aside><main class="main"><header class="topbar"><div>BADLIONMENUUI / <span>COMPATIBILITY</span></div><div><a href="https://github.com/RealBatu20/BadlionClientUILibrary">Source</a><a href="https://github.com/RealBatu20/BadlionClientUILibrary/issues">Issues</a></div></header><div class="article"><div class="eyebrow">MINECRAFT BEDROCK · ANDROID ARM64 · LEVILAUNCHROID</div><article><h1>Compatibility, signatures, verification and test matrix</h1>
+<p><strong>Main target</strong>: MCBE 1.26.62.1 ARM64 (<code>libminecraftpe.so</code> from the supplied dependency archive), LeviLaunchroid 1.6.1 Preloader and Android API 26+. The manifest uses <code>minecraft_versions: [&quot;1.26.*&quot;, &quot;1.26.6*&quot;]</code>. These are version declarations; they are not equivalent to successful testing on every version.</p>
+<h2>Native ELF and reproducible build</h2>
+<p>The <code>.so</code> is compiled using Android NDK r28c’s <code>aarch64-linux-android26-clang++</code>, linked to the provided <code>libpreloader.so</code> and the platform <code>libc++_shared.so</code>. Check it with:</p>
+<pre><code class="language-bash">file build/arm64-v8a/libbadlionmenuui.so
+llvm-readelf -d build/arm64-v8a/libbadlionmenuui.so
+llvm-nm -D --defined-only build/arm64-v8a/libbadlionmenuui.so
+</code></pre>
+<p>Expected exported functions include <code>PLGetModRegistration</code>, <code>BadlionUI_RegisterModule</code>, <code>BadlionUI_RegisterCategory</code>, <code>BadlionUI_UnregisterCategory</code>, <code>BadlionUI_SetTemplatesVisible</code>, <code>BadlionUI_Snapshot</code>, and visibility/configuration APIs. There must be exactly one <code>.so</code> inside the import package and the manifest <code>entry</code> must point to it.</p>
+<h2>Hardcoded signatures with wildcards</h2>
+<p>The supplied Minecraft 1.26.62.1 ELF’s Build ID was identified as <code>c60fa32908019eecae39ebfe7bac5755dc35cde2</code>. The diagnostic pause-menu wildcard signature is in <code>src/SignatureProfile.hpp</code> and can be checked with <code>tools/check_signature.py</code>; it has one match in that supplied binary. It is <strong>not</strong> used for a game hook or memory patch by this UI library.</p>
+<p>The supplied LeviLaunchroid 1.6.1 <code>libpreloader.so</code> has Build ID <code>b4fb680b6be8da236e5068b7a237f5311c7f4ed8</code>. The guarded native Activity lookup anchors on the exported <code>PreloaderInput.nativeSetActivity</code> function and checks the hardcoded pattern <code>E1 03 02 AA ?? ?? ?? 14</code> before decoding <code>B</code>, <code>ADRP x21</code> and <code>LDR x1,[x21,#imm]</code> to recover a <strong>read-only</strong> JNI global Activity reference. No patch, trampoline, manual function execution or unknown game address is used. In the supplied file, the decoded reference lives at relative address <code>0x1023A0</code>, but the runtime code <em>does not hardcode this offset</em>.</p>
+<p>A different preloader sequence is not trusted and is rejected. A fallback through Activity lifecycle callbacks or Android’s ActivityThread may work but may also be restricted. Do not disable this safety check merely to force the UI to open.</p>
+<h2>Test results and what was not tested</h2>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ARM64 ELF build against supplied NDK and Preloader .so</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>ELF architecture, export table, matching 1 .so package</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>Generated DEX035 header, SHA-1, Adler32, class metadata and annotation table</td>
+<td>Pass (static)</td>
+</tr>
+<tr>
+<td>Desktop Chromium switches, search, 3 templates, custom category registration, settings</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>Normal/Compact, 430px and 320px portrait, 2560px desktop fitting</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>Profiles, template details, simulated native custom-category callback integration</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>ZIP integrity, manifest keys/versions and embedded resources</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>On-device Android DEX loading and Activity bootstrap</td>
+<td><strong>Not tested</strong></td>
+</tr>
+<tr>
+<td>WebView on the actual Minecraft startup/loading screen</td>
+<td><strong>Not tested</strong></td>
+</tr>
+<tr>
+<td>Cross-OEM compatibility and hot-unload after Activity destroy</td>
+<td><strong>Not tested</strong></td>
+</tr>
+</tbody>
+</table>
+<p>No emulator or Android phone was connected to this build environment. Compilation and browser tests cannot guarantee successful execution inside Minecraft.</p>
+<h2>User-facing scope</h2>
+<p>Only <strong>three</strong> starter buttons are built in (<code>PvP</code>, <code>Hypixel</code>, <code>Visual</code>). Their native callbacks log toggle changes but implement no Bedrock gameplay effects. Developers own real features and can register custom categories through the new exported C ABI. The All filter is synthetic; it displays all visible native modules in all registered categories. Browser and ARM64 compilation tests have been rerun for v1.1.5; this is not a substitute for physical Android runtime validation.</p>
+<h2>v1.1.2 visible-world overlay regression</h2>
+<p><code>python3 tests/test_overlay_regression.py</code> tests the native-show / stale-HTML-hidden state and ensures the panel reappears. Android runtime checks and startup-button controls are documented in <code>FIX_STARTUP_WORLD_OVERLAY.md</code>.</p>
+<h2>v1.1.3 category and template regression</h2>
+<p>Run <code>python3 tests/test_category_templates.py</code> to verify that All contains all three template cards, each built-in category contains only its own, developer-owned custom categories can be added and removed, and native snapshots dynamically replace the sidebar and cards. Run <code>python3 tests/test_full_menu.py</code> for Normal/Compact/portrait previews.</p>
+<h2>HUD button regression</h2>
+<p>Run <code>python3 tests/test_single_hud_button.py</code> to check that the native Levi button is still registered and that no independent Android/Web fallback launcher is emitted. This source/browser test cannot verify the HUD editor on a real device.</p>
+</article><div class="jump"><a href="troubleshooting.html">← Troubleshooting</a><a href="github-pages.html">GitHub Pages setup →</a></div><div class="note">v1.1.5 · Native device compatibility not validated for this release.</div></div></main></div><script defer src="assets/site.js"></script></body></html>

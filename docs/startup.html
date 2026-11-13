@@ -1,0 +1,76 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="BadlionMenuUI native C++ / HTML documentation: Android &amp; startup"><title>Android &amp; startup — BadlionMenuUI Docs</title><link rel="stylesheet" href="assets/site.css"></head><body><button id="mob" aria-label="Toggle docs navigation">☰</button><div class="shell"><aside class="sidebar"><div class="identity"><img src="assets/badlion_logo.png" alt="Badlion-style logo"><div><strong>BadlionMenuUI</strong><small>C/C++ · Java/DEX · v1.1.5</small></div></div><input id="docSearch" class="search" type="search" placeholder="Filter documentation…" aria-label="Filter documentation links"><div class="navcaption">DEVELOPER DOCUMENTATION</div><nav><a class="side-link " href="index.html"><b>01</b> Overview</a><a class="side-link " href="quick-start.html"><b>02</b> Quick start</a><a class="side-link " href="developer-api.html"><b>03</b> Developer C/C++ API</a><a class="side-link " href="categories.html"><b>04</b> Categories &amp; templates</a><a class="side-link " href="custom-title.html"><b>05</b> Custom title &amp; styling</a><a class="side-link " href="single-hud-button.html"><b>06</b> HUD button &amp; editor</a><a class="side-link " href="web.html"><b>07</b> HTML, CSS &amp; JavaScript</a><a class="side-link " href="design.html"><b>08</b> Design &amp; scaling</a><a class="side-link active" href="startup.html"><b>09</b> Android &amp; startup</a><a class="side-link " href="troubleshooting.html"><b>10</b> Troubleshooting</a><a class="side-link " href="compatibility.html"><b>11</b> Compatibility</a><a class="side-link " href="github-pages.html"><b>12</b> GitHub Pages setup</a></nav><p id="empty" hidden>No matching page</p><div class="sidebar-footer"><a href="https://github.com/RealBatu20/BadlionClientUILibrary">GitHub repository</a><div class="note">Independent community UI library.</div></div></aside><main class="main"><header class="topbar"><div>BADLIONMENUUI / <span>ANDROID &AMP; STARTUP</span></div><div><a href="https://github.com/RealBatu20/BadlionClientUILibrary">Source</a><a href="https://github.com/RealBatu20/BadlionClientUILibrary/issues">Issues</a></div></header><div class="article"><div class="eyebrow">MINECRAFT BEDROCK · ANDROID ARM64 · LEVILAUNCHROID</div><article><h1>Android startup overlay, in-memory DEX and JNI integration</h1>
+<p>This file documents the <strong>built-in automatic attempt</strong> added in 1.1.1, which replaces the earlier Java-source-only integration. It requires no edit to the Minecraft APK. The fallback Java integration method remains available separately.</p>
+<h2>Contents</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/AndroidAutoHost.cpp</code></td>
+<td>Creates JavaVM attachment, dynamic DEX loader, lifecycle callback registration and Android UI-thread WebView</td>
+</tr>
+<tr>
+<td><code>tools/dex/generate_minimal_dex.py</code></td>
+<td>Builds <code>dex/classes.dex</code> (DEX version 035) with a deterministic local Python generator</td>
+</tr>
+<tr>
+<td><code>dex/classes.dex</code></td>
+<td>Three executable Java classes with methods bound to C++ using <code>JNIEnv::RegisterNatives</code></td>
+</tr>
+<tr>
+<td><code>web/index.html</code></td>
+<td>Bundled UI loaded into WebView with base URL <code>https://badlion.local/</code></td>
+</tr>
+<tr>
+<td><code>src/BadlionMenu.cpp</code></td>
+<td>Preloader lifecycle and persistent logo floating button</td>
+</tr>
+</tbody>
+</table>
+<h2>Full initialization order</h2>
+<ol>
+<li><strong><code>modLoad</code></strong>: initializes default modules, resolves the extracted folder from <code>dladdr</code>, restores persistent native config, then invokes <code>Badlion_AutoHostStart</code>.</li>
+<li><strong>Java VM discovery</strong>: calls <code>JNI_GetCreatedJavaVMs</code> from the Android runtime and attaches only if needed.</li>
+<li><strong>Activity lookup</strong>: on the supplied preloader, locates exported <code>Java_org_levimc_launcher_preloader_PreloaderInput_nativeSetActivity</code>. The hardcoded ARM64 pattern is <code>E1 03 02 AA ?? ?? ?? 14</code>. A bounds-checked decoder follows its branch, finds <code>ADRP x21</code> plus <code>LDR x1,[x21,#offset]</code>, and reads the previously registered global Activity reference. <strong>This never modifies the preloader’s code or its reference.</strong></li>
+<li><strong>Get Application</strong>: calls public <code>Activity.getApplication()</code>; if no preloader Activity exists yet, tries <code>ActivityThread.currentApplication()</code>. This fallback may be blocked on some OS versions.</li>
+<li><strong>Load DEX</strong>: reads <code>resources/classes.dex</code> (small, local, header-checked) and constructs <code>InMemoryDexClassLoader(ByteBuffer, parentClassLoader)</code> on API 26+.</li>
+<li><strong>Connect JNI</strong>: loads <code>HostApi</code>, <code>UiTask</code> and <code>ActivityObserver</code>; registers <code>HostApi.snapshot</code>, <code>setEnabled</code>, <code>setVisible</code>, <code>setMode</code>, <code>setOpacity</code>, <code>UiTask.run</code> and the lifecycle callbacks.</li>
+<li><strong>Lifecycle</strong>: registers <code>Application.registerActivityLifecycleCallbacks</code> and calls <code>Activity.runOnUiThread(UiTask)</code> if an Activity exists. Otherwise it can discover an Activity on creation/resume.</li>
+<li><strong>WebView</strong>: UI-thread task builds a transparent <code>FrameLayout</code> in the Activity decor, configures WebView with JavaScript and DOM storage, disables file/content access and multiple windows, adds annotated <code>BadlionHost</code> and loads HTML via <code>loadDataWithBaseURL()</code>.</li>
+<li><strong>Sync</strong>: the same UI task posts itself every 350ms. It keeps native visibility and module snapshots synchronized. The Preloader floating icon stays separately registered by <code>modEnable</code>.</li>
+</ol>
+<h2>DEX generator details</h2>
+<p>All three DEX classes are real class definitions:</p>
+<ul>
+<li><code>org.therealbatu.badlion.UiTask implements Runnable</code> with a native <code>run()</code> method. UI tasks execute on Android’s main thread.</li>
+<li><code>org.therealbatu.badlion.HostApi</code> with five public native methods carrying runtime-visible <code>android.webkit.JavascriptInterface</code> annotations (needed on Android API 17+).</li>
+<li><code>org.therealbatu.badlion.ActivityObserver implements Application.ActivityLifecycleCallbacks</code> with seven native lifecycle methods.</li>
+</ul>
+<p>Each class has a tiny actual constructor (<code>invoke-direct Object.&lt;init&gt;; return-void</code>). The generator emits DEX headers, string/type/prototype/method IDs, code items, annotation sets, class data, map list, SHA-1 and Adler32 checksum. It uses only Python’s standard library. <strong>The DEX is not a stub filename; it is built and embedded in the <code>.levipack</code>.</strong></p>
+<pre><code class="language-bash">python3 tools/dex/generate_minimal_dex.py
+file dex/classes.dex   # 'Dalvik dex file version 035' on hosts with DEX-aware file magic
+</code></pre>
+<h2>Java source alternative</h2>
+<p>A separate readable implementation, <code>android/app/src/main/java/org/therealbatu/badlion/BadlionMenuBridge.java</code>, provides <code>install(Activity, File, String)</code> for app hosts that already own and can edit their Activity. This separate Java file requires Android SDK <code>android.jar</code> + D8 to build and is <strong>not</strong> used by the automatic DEX path. See <code>android/README.md</code> and <code>docs/ANDROID_DEX_STARTUP.md</code> for this optional adapter.</p>
+<h2>Troubleshooting</h2>
+<p>Inspect <code>adb logcat -s BadlionUI.Host BadlionMenuUI</code> while launching the game. Expected events include <code>In-memory DEX, JavaScript bridge, Activity observer registered</code> and <code>Full HTML WebView attached to Activity</code>. If no UI appears, check the preloader build ID, mod folder resource paths, <code>libpreloader.so</code> version and Android WebView availability. An incompatible Activity lookup will not be force-patched.</p>
+<p>Typical issues:</p>
+<ul>
+<li><strong>Floating logo shows but HTML does not</strong>: native mod/menu registered, but DEX load, Activity lookup or WebView attach failed; inspect <code>BadlionUI.Host</code> logs.</li>
+<li><strong>HTML opens but toggles do nothing in Minecraft</strong>: these are demo entries. Register an actual developer callback and implement the game behavior in your mod.</li>
+<li><strong>Old Android version</strong>: this version requires API 26+, because it uses <code>InMemoryDexClassLoader</code>.</li>
+<li><strong>Different preloader build</strong>: signature decoding is deliberately guarded and will fall back to lifecycle/reflection if available.</li>
+<li><strong>Game loading screen</strong>: the overlay is attempted as soon as native loading and Android Activity access permit. Neither preloader HUD render timing nor WebView initialization latency can be guaranteed without on-device instrumentation.</li>
+</ul>
+<h2>Security and crash prevention</h2>
+<p>All HTML is shipped locally. File/content access and WebView multiple windows are disabled. The JS bridge is exposed only to the bundled, known UI document; do not add remote navigation. The decoder checks instruction bitmasks and displacement bounds before reading the preloader’s global Activity JNI reference. The game’s 1.26.62.1 ELF is <strong>not patched or hooked</strong> by this UI library.</p>
+<p>A WebView is created/destroyed only by tasks on the Android UI thread. Preloader disable/unload attempts to remove lifecycle callbacks and scheduled UI jobs. Hot-unloading during Activity destruction must still be tested on actual hardware.</p>
+<h2>v1.1.3 custom categories and templates</h2>
+<p>The WebView JNI class layout and generated DEX <strong>do not need to change</strong> for this update. <code>HostApi.snapshot()</code> forwards the expanded JSON catalog: <code>templatesVisible</code>, <code>categories</code>, and <code>modules</code>. The three starter cards are functional native toggle examples with <code>template:true</code>; developer-owned cards have <code>template:false</code>. Users can hide starter cards from the HTML Settings page, while C++ developers can hide them in native snapshots using <code>BadlionUI_SetTemplatesVisible(0)</code>. The dynamic sidebar is implemented entirely in <code>web/src/menu.js</code>, so no hardcoded custom-category names are required in Java/DEX.</p>
+<h2>v1.1.5 — one HUD-controlled launcher</h2>
+<p>The Android host attaches <strong>only the full HTML menu</strong>. It does not attach a small floating button WebView. The single launcher is a native Levi ModMenu <code>registerButton</code> widget, so HUD Editor can move/resize it. Startup HTML menu visibility is independent of when Levi draws its HUD controls.</p>
+</article><div class="jump"><a href="design.html">← Design &amp; scaling</a><a href="troubleshooting.html">Troubleshooting →</a></div><div class="note">v1.1.5 · Native device compatibility not validated for this release.</div></div></main></div><script defer src="assets/site.js"></script></body></html>

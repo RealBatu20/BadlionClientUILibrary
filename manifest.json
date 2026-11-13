@@ -1,0 +1,13 @@
+{
+  "type": "preload-native",
+  "name": "BadlionMenuUI",
+  "author": "TheRealBatu",
+  "version": "1.1.5",
+  "entry": "libbadlionmenuui.so",
+  "minecraft_versions": [
+    "1.26.*",
+    "1.26.6*"
+  ],
+  "overwrite_files": [],
+  "overwrite_folders": []
+}

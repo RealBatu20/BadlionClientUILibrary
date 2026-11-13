@@ -1,0 +1,64 @@
+{
+  "manifest": {
+    "type": "preload-native",
+    "name": "BadlionMenuUI",
+    "author": "TheRealBatu",
+    "version": "1.1.5",
+    "entry": "libbadlionmenuui.so",
+    "minecraft_versions": [
+      "1.26.*",
+      "1.26.6*"
+    ],
+    "overwrite_files": [],
+    "overwrite_folders": []
+  },
+  "arm64_sha256": "dc50d41c07be4e40939b068cbff7b5dec5e557dbcef41d5f62a77e9b07c5c3e7",
+  "artifacts": {
+    "libBadlionMenuUI_1.1.5.levipack": {
+      "bytes": 169396,
+      "sha256": "a675b0557bf08e2529c965550300f847f62ced96f100b7aeabcf5be2edc6ffc4"
+    },
+    "libBadlionMenuUI_1.1.5_arm64.so": {
+      "bytes": 98968,
+      "sha256": "dc50d41c07be4e40939b068cbff7b5dec5e557dbcef41d5f62a77e9b07c5c3e7"
+    },
+    "libBadlionMenuUI_1.1.5_src.zip": {
+      "bytes": 1572386,
+      "sha256": "240ff5b3e651242462d7881d8f04036d359524e8381a085a0dda13e91392bdbe"
+    }
+  },
+  "package_entries": [
+    "manifest.json",
+    "libbadlionmenuui.so",
+    "resources/badlion_logo.png",
+    "resources/badlion_button_normal.png",
+    "resources/badlion_button_pressed.png",
+    "resources/levi_template_aft.png",
+    "resources/levi_template_bfr.png",
+    "resources/ui/index.html",
+    "resources/classes.dex",
+    "docs/ANDROID_DEX_AUTOSTART.md",
+    "docs/ANDROID_DEX_STARTUP.md",
+    "docs/COMPATIBILITY_AND_TESTING.md",
+    "docs/CUSTOM_CATEGORIES_AND_TEMPLATES.md",
+    "docs/CUSTOM_TITLE.md",
+    "docs/DESIGN_AND_RESOLUTION.md",
+    "docs/DEVELOPER_API.md",
+    "docs/FIX_SINGLE_HUD_BUTTON.md",
+    "docs/FIX_STARTUP_WORLD_OVERLAY.md",
+    "docs/FIX_VECTOR_ENABLE.md",
+    "docs/GITHUB_PAGES.md",
+    "docs/QUICK_START.md",
+    "docs/WEB_MENU_DEVELOPMENT.md",
+    "README.md"
+  ],
+  "source_file_count": 81,
+  "notes": [
+    "ARM64 compiled and ELF checked",
+    "ZIP CRC and one-so/manifest rules passed",
+    "3 real toggle templates / dynamically rendered category UI checked",
+    "Only native Levi editable HUD button; no second WebView launcher",
+    "Offline-generated JNI DEX bundled and integrity-checked",
+    "Automatic Activity bootstrap compiled; v1.1.5 unverified on physical device"
+  ]
+}

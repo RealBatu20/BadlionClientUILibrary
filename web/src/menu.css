@@ -1,0 +1,75 @@
+
+:root{--accent:#2ca9d0;--ink:#f5f5f5;--dim:#bfc0c4;--panel:rgba(30,30,32,.95);--tile:rgba(13,13,15,.22);--outline:rgba(255,255,255,.15);--scale:1;--opacity:.95}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:transparent;color:var(--ink);font:13px/1.35 Arial,Roboto,sans-serif;overflow:hidden}body{touch-action:manipulation}button,input{font:inherit;color:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}#root{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none}#panel{pointer-events:auto;position:relative;width:820px;height:460px;flex-shrink:0;transform:scale(var(--scale));transform-origin:center center;background:linear-gradient(140deg,rgba(47,47,48,var(--opacity)),rgba(24,24,26,var(--opacity)));box-shadow:0 14px 50px #000b;border:1px solid #3d3d3d;border-radius:4px;display:flex;flex-direction:column;overflow:hidden}.header{height:51px;display:flex;align-items:center;padding:7px 8px 4px;gap:8px}.logo{width:30px;height:34px;object-fit:contain}.brand{font-family:Impact,'Arial Narrow',sans-serif;font-weight:900;font-stretch:condensed;font-size:18px;letter-spacing:-.3px}.close{margin-left:auto;background:transparent;border:1px solid #505050;width:28px;height:28px;font-size:25px;line-height:22px;border-radius:3px;color:#e8e8e8}.close:hover{background:#633}.toolbar{height:40px;display:grid;grid-template-columns:137px 137px 138px minmax(0,1fr);gap:8px;padding:0 6px 7px 10px}.tab{height:28px;background:#212123;border:1px solid #454547;border-radius:4px;font-size:18px}.tab.active{background:var(--accent);border-color:var(--accent)}.search{width:100%;height:27px;padding:0 8px;background:rgba(34,34,34,.7);border:1px solid #484849;border-radius:3px;font-size:16px;min-width:0}.body{flex:1;display:flex;min-height:0;padding:0 8px 7px 6px;gap:12px}.sidebar{width:156px;flex-shrink:0;display:flex;flex-direction:column;gap:3px}.filter{text-align:center;color:#ccc;font-size:15px;height:24px}.filterBtn{width:139px;height:29px;text-align:left;display:flex;gap:10px;align-items:center;background:transparent;border:0;border-radius:3px;padding:0 8px;font-size:14px}.filterBtn.active{background:var(--accent)}.filterBtn .glyph{font-size:17px;width:14px;text-align:center}.edit{margin-top:auto;height:28px;width:151px;border:1px solid #525252;background:#303030a3;border-radius:3px}.content{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-color:var(--accent) transparent;scrollbar-width:thin;padding-right:8px}.module-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.module{height:96px;background:var(--tile);border:1px solid #494949;border-radius:4px;display:flex;flex-direction:column;align-items:center;padding:6px 3px 5px;position:relative;min-width:0}.module:hover{border-color:#777}.modtitle{text-align:center;font-size:10px;font-weight:bold;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}.symbol{height:48px;display:grid;place-items:center;font-size:27px;line-height:1;color:#fff}.symbol svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}.switch{display:block;position:relative;width:36px;height:17px;border-radius:18px;background:#55575a;border:0;padding:0;flex-shrink:0}.switch.on{background:var(--accent)}.switch::before{content:'×';position:absolute;top:2px;left:3px;width:13px;height:13px;border-radius:50%;background:#eee;color:#535353;font-weight:bold;line-height:12px;font-size:13px}.switch.on::before{content:'✓';left:20px;color:var(--accent);font-size:12px}.page{flex:1;overflow:auto;padding:8px 15px}.page h2{font-size:19px;font-weight:normal;margin:4px 0 12px}.page p{color:#c0c0c0}.prefs{max-width:610px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.pref{min-height:71px;background:#292929;border:1px solid #494949;padding:11px;border-radius:4px}.pref label{display:block;font-weight:bold;margin-bottom:7px}.pref input[type=range]{width:95%;accent-color:var(--accent)}.pref select,.pref input[type=text]{background:#222;border:1px solid #555;padding:5px;color:white;width:100%}.segment{display:flex;gap:4px}.segment button{background:#383838;border:1px solid #555;padding:6px 10px;border-radius:2px;flex:1}.segment .active{background:var(--accent)}.footnote{font-size:11px;color:#aaa;margin-top:15px}.settings-title{display:flex;align-items:center;gap:12px}.custom{font-size:12px;color:#bbb}.compact #panel{width:570px;height:475px}.compact .toolbar{grid-template-columns:86px 86px 86px minmax(0,1fr);gap:4px;padding-left:7px}.compact .tab{font-size:13px}.compact .brand{font-size:16px}.compact .sidebar{width:111px}.compact .filterBtn{width:105px;font-size:12px}.compact .edit{width:107px}.compact .body{gap:5px}.compact .module-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.compact .module{height:54px;flex-direction:row;justify-content:space-between;padding:4px 5px;gap:4px}.compact .module .symbol{height:30px;font-size:18px;order:0}.compact .module .symbol svg{width:19px;height:19px}.compact .module .modtitle{font-size:10px;flex:1;text-align:left;order:1;white-space:normal}.compact .module .switch{order:2;width:26px;height:14px}.compact .module .switch:before{height:10px;width:10px;top:2px;left:2px;font-size:10px;line-height:10px}.compact .module .switch.on:before{left:14px}.compact .prefs{grid-template-columns:1fr}.compact .search{font-size:12px}.is-hidden #panel{display:none}.is-hidden @media (prefers-reduced-motion:no-preference){.module,.switch,.tab{transition:background .12s,border-color .12s}}
+
+/* Portrait auto-fit keeps controls readable on phones without changing the saved mode. */
+.compact.portrait #panel{width:380px;height:690px}
+.compact.portrait .toolbar{grid-template-columns:65px 72px 68px minmax(0,1fr);gap:4px;padding:0 6px 6px}
+.compact.portrait 
+.compact.portrait .toolbar .tab{font-size:12px}
+.compact.portrait .sidebar{width:78px}
+.compact.portrait .filterBtn{width:76px;font-size:11px;padding:0 3px;gap:4px}
+.compact.portrait .filterBtn .glyph{width:11px;font-size:13px}
+.compact.portrait .edit{width:76px;font-size:11px;padding:0}
+.compact.portrait .body{gap:3px;padding-left:5px;padding-right:4px}
+.compact.portrait .content{padding-right:2px}
+.compact.portrait .module-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+.compact.portrait .module{height:54px}
+.compact.portrait .module .modtitle{font-size:10px}
+.compact.portrait .prefs{grid-template-columns:1fr}
+
+
+/* Developer module details, profiles and HUD editor features. */
+:root{--offset-x:0px;--offset-y:0px}
+#panel{transform:translate(var(--offset-x),var(--offset-y)) scale(var(--scale))}
+#panelHeader{touch-action:none;user-select:none}
+.editing #panelHeader{cursor:move;outline:1px dashed var(--accent);outline-offset:-4px}
+#detail[hidden]{display:none}
+#detail{position:absolute;inset:0;z-index:10;display:grid;place-items:center;background:rgba(0,0,0,.65);padding:20px}
+.detail-box{width:min(430px,100%);padding:16px;background:#242426;border:1px solid #666;border-radius:5px;box-shadow:0 9px 28px #000a}
+.detail-heading{display:flex;align-items:center;gap:12px;border-bottom:1px solid #444;padding-bottom:10px}
+.detail-heading strong{display:block;font-size:18px}.detail-heading small{color:#aaa}.detail-symbol{width:42px;font-size:30px;text-align:center}
+.detail-close{margin-left:auto;font-size:26px;line-height:1;border:1px solid #555;border-radius:3px;background:#303030}
+.detail-box p{margin:12px 0;color:#ddd}.detail-box .module-id{font:11px monospace;color:#aaa;word-break:break-all}
+.detail-status{font-size:12px}.detail-actions{display:flex;gap:8px}.detail-actions button{flex:1;font-size:14px}
+.module{cursor:pointer}.module:focus-visible{outline:2px solid var(--accent)}
+.module .switch{cursor:pointer}
+.square-grid:not(.compact) .module{height:108px}
+.square-grid:not(.compact) .module .symbol{height:60px}
+.square-grid.compact .module{height:68px}
+.portrait.square-grid .module{height:58px}
+.pref input[type=color]{width:58px;height:28px;background:transparent;border:1px solid #444;padding:2px;cursor:pointer}
+.pref .action{background:var(--accent);border:0;padding:5px 12px;margin-top:6px;border-radius:2px}
+.segment button:disabled{opacity:.4;cursor:default}
+.empty{padding:20px;text-align:center;color:#aaa}
+.native-host 
+/* Keep the grid track inside narrow phone viewports before transforming its child. */
+#root{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+
+/* v1.1.3: real developer templates and dynamic category sidebar */
+.category-filters{display:flex;flex-direction:column;gap:3px;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#46869c transparent}
+.category-filters .filterBtn{flex:none;max-width:100%}
+.category-filters .filter-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.module .template-mark{position:absolute;bottom:8px;left:7px;font-size:8px;letter-spacing:.07em;color:#62c1dc;opacity:.85;pointer-events:none}
+.module.template-card{border-color:#527582}
+.module-grid.templates-only{grid-template-columns:repeat(3,minmax(0,1fr));align-content:start}
+.module-grid.templates-only .module{height:117px}
+.module-grid.templates-only .module .modtitle{font-size:13px}
+.module-grid.templates-only .module .symbol{font-size:34px;height:45px}
+.compact .module-grid.templates-only{grid-template-columns:repeat(3,minmax(0,1fr))}
+.compact .module-grid.templates-only .module{height:108px}
+.portrait .module-grid.templates-only{grid-template-columns:repeat(2,minmax(0,1fr))}
+.portrait .module-grid.templates-only .module{height:88px}
+.portrait .module-grid.templates-only .module .modtitle{font-size:11px}
+.portrait .module .template-mark{font-size:7px}
+
+.module .symbol .template-logo{width:33px;height:33px;object-fit:contain}
+.module-grid.templates-only .module .symbol .template-logo{width:39px;height:39px}
+.compact .module .symbol .template-logo{width:27px;height:27px}
+.portrait .module .symbol .template-logo{width:25px;height:25px}
+
+/* Title can change without replacing its original condensed font. */
+.header .brand{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:calc(100% - 75px)}
+
+/* Flex centering uses the viewport, not the panel's unscaled grid track. */
+#root{display:flex;align-items:center;justify-content:center}

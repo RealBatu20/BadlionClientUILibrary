@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="BadlionMenuUI native C++ / HTML documentation: Design &amp; scaling"><title>Design &amp; scaling — BadlionMenuUI Docs</title><link rel="stylesheet" href="assets/site.css"></head><body><button id="mob" aria-label="Toggle docs navigation">☰</button><div class="shell"><aside class="sidebar"><div class="identity"><img src="assets/badlion_logo.png" alt="Badlion-style logo"><div><strong>BadlionMenuUI</strong><small>C/C++ · Java/DEX · v1.1.5</small></div></div><input id="docSearch" class="search" type="search" placeholder="Filter documentation…" aria-label="Filter documentation links"><div class="navcaption">DEVELOPER DOCUMENTATION</div><nav><a class="side-link " href="index.html"><b>01</b> Overview</a><a class="side-link " href="quick-start.html"><b>02</b> Quick start</a><a class="side-link " href="developer-api.html"><b>03</b> Developer C/C++ API</a><a class="side-link " href="categories.html"><b>04</b> Categories &amp; templates</a><a class="side-link " href="custom-title.html"><b>05</b> Custom title &amp; styling</a><a class="side-link " href="single-hud-button.html"><b>06</b> HUD button &amp; editor</a><a class="side-link " href="web.html"><b>07</b> HTML, CSS &amp; JavaScript</a><a class="side-link active" href="design.html"><b>08</b> Design &amp; scaling</a><a class="side-link " href="startup.html"><b>09</b> Android &amp; startup</a><a class="side-link " href="troubleshooting.html"><b>10</b> Troubleshooting</a><a class="side-link " href="compatibility.html"><b>11</b> Compatibility</a><a class="side-link " href="github-pages.html"><b>12</b> GitHub Pages setup</a></nav><p id="empty" hidden>No matching page</p><div class="sidebar-footer"><a href="https://github.com/RealBatu20/BadlionClientUILibrary">GitHub repository</a><div class="note">Independent community UI library.</div></div></aside><main class="main"><header class="topbar"><div>BADLIONMENUUI / <span>DESIGN &AMP; SCALING</span></div><div><a href="https://github.com/RealBatu20/BadlionClientUILibrary">Source</a><a href="https://github.com/RealBatu20/BadlionClientUILibrary/issues">Issues</a></div></header><div class="article"><div class="eyebrow">MINECRAFT BEDROCK · ANDROID ARM64 · LEVILAUNCHROID</div><article><h1>UI design, themes and screen-resolution scaling</h1>
+<p>Based on the user-provided screenshots: dark translucent Badlion-style module menu, a black/blue logo, a compact toolbar with Mods/Settings/Profiles, left category filter, a module grid with icons and on/off switches, and an Edit GUI action. This project is not affiliated with the original Badlion Client. Compact Mode is an added variation.</p>
+<h2>Layouts</h2>
+<table>
+<thead>
+<tr>
+<th>Layout</th>
+<th style="text-align:right">Logical panel</th>
+<th style="text-align:right">Grid</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Normal</td>
+<td style="text-align:right">820 × 460 CSS px</td>
+<td style="text-align:right">6 columns</td>
+<td>Closest to the provided image 1 reference</td>
+</tr>
+<tr>
+<td>Compact</td>
+<td style="text-align:right">570 × 475 CSS px</td>
+<td style="text-align:right">4 columns</td>
+<td>Dense rows of small icons, text and switches</td>
+</tr>
+<tr>
+<td>Portrait adaptation</td>
+<td style="text-align:right">380 × 690 CSS px</td>
+<td style="text-align:right">2 columns</td>
+<td>Auto-applies on narrow phones without changing saved Normal/Compact preference</td>
+</tr>
+</tbody>
+</table>
+<p>The toolbar and module grid are native <strong>HTML/CSS</strong>, not pixel screenshots. Module data comes from three native callback-backed template cards plus developer-registered cards; the category list comes from native <code>categories</code> snapshot data. The All filter aggregates every category, while PvP/Hypixel/Visual each initially contain exactly one template. The user-provided PNG logo appears on each starter template card, is embedded in the standalone HTML, and is composited into the supplied Levi HUD button templates; the launcher button is separate from module cards.</p>
+<h2>Resolution adaptation</h2>
+<p><code>updateScale()</code> reads <code>window.visualViewport</code> if available, otherwise <code>innerWidth/innerHeight</code>. It checks portrait orientation, selects a layout, and calculates a scale bounded by available CSS viewport space with 10px margins. User Scale can be adjusted between 70% and 130%; the panel still clamps to fit the viewport. <code>devicePixelRatio</code> is displayed as a diagnostic but doesn’t need manual division since CSS pixel measurements already reflect Android density. Position drag is clamped to screen bounds.</p>
+<p>Normal/Compact selection, panel coordinates, visual theme, square tile size and scale are persisted in UI localStorage. On Android, JNI exposes native module state, Compact mode and opacity from the native C++ registry; native switch states are saved under the mod’s config folder.</p>
+<p>For <strong>All</strong> with exactly the three starter cards visible, the grid uses three wider sample cards for clarity. When developers register additional modules, the regular six-column grid resumes; Compact uses four columns. When a developer registers a custom category, the sidebar gains a dynamically generated filter button without changing the screen’s saved layout.</p>
+<h2>Settings</h2>
+<ul>
+<li>Normal and Compact mode buttons</li>
+<li>Regular, Opacity and Insider-inspired visual themes</li>
+<li>Opacity slider (40–100%)</li>
+<li>User size slider (70–130%) and automatic fit</li>
+<li>Standard vs square module tiles</li>
+<li>Accent color picker (Regular/Opacity)</li>
+<li>Device viewport and pixel density readout</li>
+<li>Edit GUI drag mode and reset panel position</li>
+<li>Template visibility (hide/show the 3 demo cards only)</li>
+<li>Dynamic sidebar category filters registered by developers</li>
+<li>Module details dialog and accessible keyboard activation</li>
+</ul>
+<p>The three themes are independent visual variations, not Badlion Client purchases or membership flags. The Premium tab has been removed. The square-size shortcut next to Search has also been removed; module-tile size is controlled in Settings.</p>
+<h2>Safe-area and touch behavior</h2>
+<p>The page has <code>viewport-fit=cover</code>, transparent background, browser touch and pointer support, and automatic orientation/viewport resize handlers. The Android host adds the WebView on the UI thread. When hidden, the Android WebView root is <code>GONE</code>, allowing touch input back to the game, while the independent native Levi floating button remains registered.</p>
+<p>Test the rendered UI on devices with cutouts, unusual aspect ratios, high display density and accessibility font overrides. No desktop browser simulation can prove perfect handling of every OS status bar or manufacturer-specific window inset.</p>
+<h2>Floating button ownership (v1.1.5)</h2>
+<p>Only the native Levi <code>registerButton</code> HUD widget exists. Adjust its size and position in Levi HUD Editor; the Android WebView owns only the module menu panel and never creates another fixed-position launcher. The native widget may not render on early startup screens before Levi initializes its HUD.</p>
+</article><div class="jump"><a href="web.html">← HTML, CSS &amp; JavaScript</a><a href="startup.html">Android &amp; startup →</a></div><div class="note">v1.1.5 · Native device compatibility not validated for this release.</div></div></main></div><script defer src="assets/site.js"></script></body></html>

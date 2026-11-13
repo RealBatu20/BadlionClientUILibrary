@@ -1,0 +1,71 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="BadlionMenuUI native C++ / HTML documentation: Quick start"><title>Quick start — BadlionMenuUI Docs</title><link rel="stylesheet" href="assets/site.css"></head><body><button id="mob" aria-label="Toggle docs navigation">☰</button><div class="shell"><aside class="sidebar"><div class="identity"><img src="assets/badlion_logo.png" alt="Badlion-style logo"><div><strong>BadlionMenuUI</strong><small>C/C++ · Java/DEX · v1.1.5</small></div></div><input id="docSearch" class="search" type="search" placeholder="Filter documentation…" aria-label="Filter documentation links"><div class="navcaption">DEVELOPER DOCUMENTATION</div><nav><a class="side-link " href="index.html"><b>01</b> Overview</a><a class="side-link active" href="quick-start.html"><b>02</b> Quick start</a><a class="side-link " href="developer-api.html"><b>03</b> Developer C/C++ API</a><a class="side-link " href="categories.html"><b>04</b> Categories &amp; templates</a><a class="side-link " href="custom-title.html"><b>05</b> Custom title &amp; styling</a><a class="side-link " href="single-hud-button.html"><b>06</b> HUD button &amp; editor</a><a class="side-link " href="web.html"><b>07</b> HTML, CSS &amp; JavaScript</a><a class="side-link " href="design.html"><b>08</b> Design &amp; scaling</a><a class="side-link " href="startup.html"><b>09</b> Android &amp; startup</a><a class="side-link " href="troubleshooting.html"><b>10</b> Troubleshooting</a><a class="side-link " href="compatibility.html"><b>11</b> Compatibility</a><a class="side-link " href="github-pages.html"><b>12</b> GitHub Pages setup</a></nav><p id="empty" hidden>No matching page</p><div class="sidebar-footer"><a href="https://github.com/RealBatu20/BadlionClientUILibrary">GitHub repository</a><div class="note">Independent community UI library.</div></div></aside><main class="main"><header class="topbar"><div>BADLIONMENUUI / <span>QUICK START</span></div><div><a href="https://github.com/RealBatu20/BadlionClientUILibrary">Source</a><a href="https://github.com/RealBatu20/BadlionClientUILibrary/issues">Issues</a></div></header><div class="article"><div class="eyebrow">MINECRAFT BEDROCK · ANDROID ARM64 · LEVILAUNCHROID</div><article><h1>Quick start — BadlionMenuUI 1.1.5</h1>
+<h2>1. Install and launch</h2>
+<p>Requirements: Minecraft Bedrock Android ARM64 with manifest versions <code>1.26.*</code> / <code>1.26.6*</code>, compatible LeviLaunchroid 1.6.1 preloader, Android 8.0/API 26+ and working Android System WebView.</p>
+<ol>
+<li>Remove the older <code>BadlionMenuUI</code> package (do not run two versions with duplicate native registrations).</li>
+<li>Import <code>libBadlionMenuUI_1.1.5.levipack</code> in LeviLaunchroid’s native-mod importer.</li>
+<li>Enable the mod and restart the game. Use the single Levi HUD Editor-controlled Badlion icon to show or hide the full menu. The independent Android startup floating button has been removed; Levi controls when its native HUD button becomes visible.</li>
+<li>Open <strong>Mods → All</strong>. Only three starter template cards should appear. They are <strong>not</strong> real Bedrock gameplay features.</li>
+</ol>
+<h2>2. Filter behavior</h2>
+<table>
+<thead>
+<tr>
+<th>Filter</th>
+<th>Cards when no developer mods are registered</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All</td>
+<td>PvP Button Template, Hypixel Button Template, Visual Button Template</td>
+</tr>
+<tr>
+<td>PvP</td>
+<td>PvP Button Template</td>
+</tr>
+<tr>
+<td>Hypixel</td>
+<td>Hypixel Button Template</td>
+</tr>
+<tr>
+<td>Visual</td>
+<td>Visual Button Template</td>
+</tr>
+</tbody>
+</table>
+<p>Each template switch changes state and fires a small demo callback; it does not perform cheat or gameplay operations. Tap a card to see its ID and template status. Disable the sample cards in Settings → <strong>Developer Template Cards</strong> when adding real modules. Other Normal/Compact, profile, theme, position, resolution and search features remain available.</p>
+<h2>3. Add a module to an existing category</h2>
+<p>In your separately loaded C++ mod, dynamically resolve <code>BadlionUI_RegisterModule</code> from the installed UI library (see <code>examples/DeveloperMod.cpp</code>):</p>
+<pre><code class="language-cpp">void onToggle(const char* id, int enabled, void* userData) {
+    // Save state, then dispatch verified gameplay operations on the game thread.
+}
+BadlionModuleDescriptor mod{
+    &quot;my_mod.pvp_item&quot;, &quot;My PvP Module&quot;, &quot;PvP&quot;, &quot;⚔&quot;,
+    &quot;Feature provided by my own mod&quot;, 0, &amp;onToggle, nullptr
+};
+// registerModule(&amp;mod) using dlsym-resolved BadlionUI_RegisterModule
+</code></pre>
+<p>The new module appears in All and PvP. The same applies to <code>Hypixel</code> and <code>Visual</code>.</p>
+<h2>4. Add a custom category and its button</h2>
+<pre><code class="language-cpp">BadlionCategoryDescriptor category{&quot;my_mod.utilities&quot;, &quot;Utilities&quot;, &quot;✦&quot;, 100};
+registerCategory(&amp;category);          // resolve the native function first
+BadlionModuleDescriptor mod{
+    &quot;my_mod.clock&quot;, &quot;Real Clock Widget&quot;, &quot;my_mod.utilities&quot;, &quot;◷&quot;,
+    &quot;Developer-owned example&quot;, 0, &amp;onToggle, nullptr
+};
+registerModule(&amp;mod);
+</code></pre>
+<p>Now All and Utilities both show your module; PvP/Hypixel/Visual remain unchanged. Registration fails if the specified custom category has not been registered. Call <code>unregisterModule(&quot;my_mod.clock&quot;)</code> <strong>before</strong> <code>unregisterCategory(&quot;my_mod.utilities&quot;)</code>. No Minecraft feature is created automatically.</p>
+<h2>5. Rebuild</h2>
+<pre><code class="language-bash">export ANDROID_NDK_HOME=/absolute/path/android-ndk-r28c
+export PRELOADER_SO=/absolute/path/libpreloader.so
+bash tools/build.sh
+python3 tests/test_category_templates.py
+python3 tests/test_full_menu.py
+python3 tools/package.py /tmp/badlion-output
+</code></pre>
+<p>The full tutorial for callback threading, custom categories, and dynamic linking is in <code>docs/DEVELOPER_API.md</code>, with browser examples in <code>docs/WEB_MENU_DEVELOPMENT.md</code>.</p>
+<h2>6. Diagnose Android issues</h2>
+<p><code>adb logcat -s BadlionMenuUI BadlionUI.Host Preloader</code> will show native enable and WebView activity. A successful ARM64 compile and browser preview do not guarantee that a particular Android Activity will accept the overlay at every screen transition. See <code>docs/FIX_STARTUP_WORLD_OVERLAY.md</code> for visibility debugging.</p>
+</article><div class="jump"><a href="index.html">← Overview</a><a href="developer-api.html">Developer C/C++ API →</a></div><div class="note">v1.1.5 · Native device compatibility not validated for this release.</div></div></main></div><script defer src="assets/site.js"></script></body></html>
